@@ -1,0 +1,13 @@
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <locale.h>
+#include <malloc.h>
+#include <time.h>
+#include <windows.h>
+#define _CRT_SECURE_NO_WARNINGS
+#define D_CRT_NONSTDC_NO_WARNINGS
+#define size 50
+#define MAX 100
+#pragma warning(disable : 4996) 
