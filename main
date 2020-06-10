@@ -1,6 +1,18 @@
-#include "C:\Users\Anastasia\OneDrive\Рабочий стол\BMSTU\infa2\ConsoleApplication200\ConsoleApplication200\Header.h"
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <conio.h>
+#include <locale.h>
+#include <malloc.h>
+#include <time.h>
+#include <windows.h>
+#define _CRT_SECURE_NO_WARNINGS
+#define D_CRT_NONSTDC_NO_WARNINGS
+#define size 50
+#define MAX 100
+#pragma warning(disable : 4996)   //отключает scanf_s и fopen_s
 
-struct library       
+struct library        // Структура для книг
 {
     unsigned long long int ISBN;
     char Author[size]; 
@@ -11,7 +23,7 @@ struct library
 
 struct library books[MAX];
 
-struct student            
+struct student              // Структура для студентов
 {
     char zachet_book[8]; 
     char name[15]; 
@@ -23,126 +35,108 @@ struct student
 
 struct student student[MAX];
 
-struct user            
+struct user             // Структура для пользователей
 { 
     char login[20]; 
     char password[20]; 
     int student;
     int book; 
 };
+
 struct user user[MAX];
 
-void add_book();   
-void del_book();    
-void give_book();   
-void take_book();  
-
-void add_student();    
-void del_student();    
-void backup_student();     
-void restore_student();    
-void find_student();        
-
-void open();               
-
-int AStude=0;   
-int ABoks=0;    
-int Ausrs=0;    
-
-
-int main()
+struct student_books              // Структура для студентов
 {
-    SetConsoleCP(1251);              
+    unsigned long long int ISBN;
+    char zachet_book[8];
+};
+
+struct student_books SB[MAX];
+
+
+struct sbdate 
+{ 
+    int day; 
+    int month; 
+    int year; 
+};
+
+struct sbdate date[MAX];
+
+void add_book();    // Функция на добавление книг
+void del_book();    // Функция на удаление книг
+void give_book();   // Функция на выдачу книг
+void take_book();   // Функция на прием книг
+
+void add_student();     // Функция на добавление студентов
+void del_student();     // Функция на удаление студентов
+void backup_student();      // Функция на бэкап студентов
+void restore_student();     // Функция на восстановление бэкапа студентов
+void find_student();        // Функция на поиск студентов
+
+void inf_stud_by_num();
+void inf_book_by_isbn();
+
+void open();                // Функция для заполнения структур из файлов
+void log(char* function, char* param, char* msg);
+int menu();
+
+void Ru()
+{
+    SetConsoleCP(1251);                
     SetConsoleOutputCP(1251);
     setlocale(LC_ALL, "Russian");
+}                                       //** русификатор консоли 
 
+int AStude=0;   // Записей в студентах
+int ABoks=0;    // Записей в книгах
+int Ausrs=0;    // Записей в пользователях
+int Astubok=0;  // Записей в студкнигах
+
+char login[20];
+char password[20];
+
+bool men = false;   // Провекра на админа по умолчанию -
+
+
+// 100 - не открывается book.csv в open_book
+// 101 - не открывается book.csv в add_book
+// 102 - не открывается book.csv в del_book
+// 103 - не открывается book.csv в give_book
+// 104 - не открывается book.csv в take_book
+
+// 200 - уже есть такой isbn в book.csv
+
+// 300 - не открывается students.csv в open_student
+
+// 600 не могу открыть studbooks
+
+// 700 не могу открыть log
+
+
+
+// Меню
+int main()
+{
+    Ru();
     open();                            
-
-    int stp;
-    char login[20];
-    char password[20];
-    printf("login:");       
-    scanf("%s",login);
-    printf("password:");    
-    scanf("%s", password);
-    
-    for (int i = 0; i < Ausrs; i++)          
-    {
-        if ((strcmp(login, user[i].login) == 0) && (strcmp(password, user[i].password) == 0))
-        {
-            stp = i;
-            break;
-        }
-    }
-    int users = -1;     
-
-    if ((user[stp].student == 1) && (user[stp].book == 1))      
-    {
-        printf(">student menu \n>book menu \n");
-        scanf("%d", &users);
-    }
-
-    int u = 0;
-
-    if ((users == 1) || ((user[stp].student == 1) && (user[stp].book == 0)))       
-    {
-        printf("\n>Add_student \n>Del_student \n>Backup_student \n>Restore_student \n>Find_student \n>Exit \n");
-        for (;;)
-        {
-            scanf("%d", &u);                                            
-            if (u == 1)
-                add_student();
-            else if (u == 2)
-                del_student();
-            else if (u == 3)
-                backup_student();
-            else if (u == 4)
-                restore_student();
-            else if (u == 5)
-                find_student();
-            else if (u == 6)
-                break;
-            else 
-                printf("Неверный ввод!\n");
-        }
-    }
-        if ((users == 2) || ((user[stp].student == 0) && (user[stp].book == 1)))            // соответсвенно вывод меню книг
-        {
-            printf("\n>Add_book \n>Delete book \n>Give_book \n>Take_book \n>Exit \n");
-            for (;;)
-            {
-                scanf("%d", &u);    // БАААГГ если в меню книг ввести букву будет вечный цикл
-                if (u == 1)
-                    add_book();
-                else if (u == 2)
-                    del_book();
-                else if (u == 3)
-                    give_book();
-                else if (u == 4)
-                    take_book();
-                else if (u == 5)
-                    break;
-                else {
-                    printf("Неверный ввод!\n");     
-                                                    
-                }
-            }
-    }
-    
+    menu();
     return 0;
 }
 
+
+// структура данных
 void open()
 {
     FILE* file;     
     int i;
 
-    if ((file = fopen("students.csv", "r")) == 0)           
+    if ((file = fopen("students.csv", "r")) == 0)           //проверка на открытие
     {
-        printf("Не могу открыть students.csv!");
+        printf("  ***Нет доступа к students.csv***");
         exit(300);
     }
-    for (i=0; !feof(file); i++)                       
+    for (i=0; !feof(file); i++)                         // пока не конец забиваем все в структуру
     {
         fscanf(file, "%[^;]%*c", student[i].zachet_book);
         fscanf(file, "%[^;]%*c", student[i].lastname);
@@ -152,11 +146,11 @@ void open()
         fscanf(file, "%[^'\n']%*c", student[i].prof);
     }
     fclose(file);
-    AStude = i;             
+    AStude = i;             // сохраняем кол-во записей
         
-    if ((file = fopen("books.csv", "r")) == 0)            
+    if ((file = fopen("books.csv", "r")) == 0)             // тоже самое с книгами
     {
-        printf("Не могу открыть books.csv");
+        printf("  ***Нет доступа  к books.csv***");
         exit(100);
     }
     for (i = 0; !feof(file); i++)
@@ -171,11 +165,11 @@ void open()
         getc(file);
     }
     fclose(file);
-    ABoks = i;             
+    ABoks = i;              // сохраняем
 
-    if ((file = fopen("users.csv", "r")) == 0)             
+    if ((file = fopen("users.csv", "r")) == 0)              // и наконец пользователи
     {
-        printf("Не могу открыть users.csv!");
+        printf("\n   ***Нет доступа к users.csv***");
         exit(500);
     }
     for (i = 0; !feof(file); i++)
@@ -188,49 +182,75 @@ void open()
         getc(file);
     }
     fclose(file);
-    Ausrs = i;             
+    Ausrs = i;              // сохранили
+
+
+    if ((file = fopen("student_books.csv", "r")) == 0)             // тоже самое с книгами
+    {
+        printf("\n   ***Нет доступа к books.csv***");
+        exit(600);
+    }
+    for (i = 0; !feof(file); i++)
+    {
+        fscanf(file, "%lld", &SB[i].ISBN);
+        getc(file);
+        fscanf(file, "%[^;]%*c", SB[i].zachet_book);
+        fscanf(file, "%d", &date[i].day);
+        getc(file);
+        fscanf(file, "%d", &date[i].month);
+        getc(file);
+        fscanf(file, "%d", &date[i].year);
+        getc(file);
+    }
+    fclose(file);
+    Astubok = i;              // сохраняем
 }
 
 
-void add_book()                 
+
+// Добавить новую книгу (при добавлении проверять нет ли уже такой книги по номеру ISBN)
+
+void add_book()
 {
-    open();                             
-                                        
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
+    open();
+    Ru();
 
     unsigned long long int ISBN;
-    char author[size]; 
+    char author[size];
     char booktitle[size];
     int total;
     int available;
-    
-    FILE* file;
-    if ((file = fopen("books.csv", "a")) == 0)         
-    {
-        printf("Не могу открыть books.csv!");
-        exit(101);
-    }
 
-    printf("ISBN книги для добавления: ");
+    FILE* file = fopen("books.csv", "a");
+
+    printf("\n |> ISBN книги: ");
     scanf("%lld", &ISBN);
 
     for (int i = 0; i < ABoks; i++)
     {
         if (ISBN == books[i].ISBN)
         {
-            printf("Такая книга уже сущетсвует");
+            printf("\n  ***Книга уже существует***");
             exit(200);
         }
+        
     }
 
-    printf("Автор: ");   
-    scanf("%s", author);
-    printf("Название: ");
+    printf(" > Автор: ");
 
-    char c = getchar();                     
-    int n = 0;                                 
+    char p = getchar();
+    int q = 0;
+    while ((p = getchar())!= '\n')
+    {
+        author[q] = p;
+        q++;
+    }
+    author[q] = '\0';
+
+    printf(" > Название: ");
+
+    char c = getchar();                      
+    int n = 0;                                  
 
     while ((c = getchar()) != '\n')
     {
@@ -239,113 +259,218 @@ void add_book()
     }
     booktitle[n] = '\0';
 
-    printf("Всего книг: ");     
+    printf(" > Всего книг: ");     
     scanf("%d", &total);
 
-    printf("Доступно: ");     
+    printf(" > Доступно: ");     
     scanf("%d", &available);
 
-    fprintf(file, "\n%lld;", ISBN);             
+    fprintf(file, "\n%lld;", ISBN);             // вывод в файл 
     fprintf(file, "%s;", author);
     fprintf(file, "%s;", booktitle);
     fprintf(file, "%d;", total);
     fprintf(file, "%d", available);
 
     fclose(file);
-    printf("\nДобавлено\n");
+    
+    printf("\n |> Добавлено <|\n"); bool add = true;
+    
+    char s[11];
+    for (int i = 9; i >= 0; i--)
+    {
+        s[i] = ISBN % 10 + '0';
+        ISBN = ISBN / 10;
+    }
+    s[10] = '\0';
 
+    if (add == true)
+        log((char*)("add_book"), (char*)(s), (char*)("Добавлено"));
+    else 
+        log((char*)("add_book"), (char*)(s), (char*)("Ошибка"));
 }
 
+
 //Удалить книгу по номеру ISBN
+//Нельзя удалить книгу, которая есть у студентов
 
 void del_book()
 {
     open();
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
+    Ru();
     unsigned long long int ISBN;
-
-    FILE* file;
-    if ((file = fopen("books.csv", "r")) == 0)
-    {
-        printf("Не могу открыть books.csv");
-        exit(102);
-    }
-
-    char* buf = (char*)malloc((ABoks+1)*(sizeof(struct library)));          
+    int c;
+    bool del = false;
+    char* buf = (char*)malloc((ABoks+1)*(sizeof(struct library)));          // выделяем память для массива, чтоб выгрузить содержимое туда
     
-    printf("ISBN книги для удаления: ");
+    printf(" |> ISBN книги для удаления: ");
     scanf("%lld", &ISBN);
 
-    int n = 0;
-    for (int i = 0; i < ABoks ; i++)                        
+    for (c = 0; c < Astubok; c++)
     {
-        if (ISBN != books[i].ISBN)                                  
-        {                                                            
-            buf[n] = getc(file);
-            for (;(buf[n] != '\n') && (!feof(file));)
-            {
-                n++;
-                buf[n] = getc(file);
-            }
-            buf[n] = '\n';
-            n++;
-        }
-        if (ISBN == books[i].ISBN)                          
+        if (SB[c].ISBN == ISBN)
         {
-            for (;(getc(file) != '\n') && (!feof(file));)              
-            {;}
+            del = true;
+            break;
         }
     }
-    buf[n - 1] = '\0';
-    fclose(file);
 
-    file = fopen("books.csv", "w");                 
+    bool add;
 
-    for (int e = 0; buf[e] != '\0'; e++)
-        fprintf(file, "%c", buf[e]);
-    fclose(file);
-    free(buf);                              
-    printf("Удалено!\n");
+    if (del == false)
+    {
+        FILE* file = fopen("books.csv", "r");
+        int n = 0;
+        for (int i = 0; i < ABoks; i++)
+        {
+            if (ISBN != books[i].ISBN)                                  // если номер не совпадает с тем, который удалить ,то копируем до \n
+            {                                                            
+                buf[n] = getc(file);
+                for (; (buf[n] != '\n') && (!feof(file));)
+                {
+                    n++;
+                    buf[n] = getc(file);
+                }
+                buf[n] = '\n';
+                n++;
+            }
+            if (ISBN == books[i].ISBN)                          //если совпдает то ничего не делаем просто берем строку до \эн 
+            {
+                for (; (getc(file) != '\n') && (!feof(file));)               //(ее таким образом не сохраняем = удаляем)
+                {
+                    ;
+                }
+            }
+        }
+        buf[n - 1] = '\0';
+        fclose(file);
+
+        file = fopen("books.csv", "w");                 // открываем на запись и выгружаем
+
+        for (int e = 0; buf[e] != '\0'; e++)
+            fprintf(file, "%c", buf[e]);
+        fclose(file);
+        free(buf);                              //почитсить
+        printf("  ***Удалено***\n"); add = true;
+    }
+    else { printf("  Невозможно удалить,так как книга у студента с ISBN: %s\n", SB[c].zachet_book); add = false; }
+   
+    char s[11];
+    for (int i = 9; i >= 0; i--)
+    {
+        s[i] = ISBN % 10 + '0';
+        ISBN = ISBN / 10;
+    }
+    s[10] = '\0';
+
+    if (add == true)
+        log((char*)("del_book"), (char*)(s), (char*)("Удалено"));
+    else
+        log((char*)("del_book"), (char*)(s), (char*)("Ошибка"));
 }
 
+//Выдать книгу студенту по номеру ISBN (необходимо уменьшить количество доступных книг
+//на 1, если количество доступных книг – 0, вывести соответствующее сообщение)
+
+//Если нет доступных книг для выдачи, необходимо выводить сообщение – когда будет
+//сдана ближайшая книга
+
+//При выдаче и сдаче книги студенту пользователь должен указать ISBN книги и номер зачетки студента
 
 void give_book()
 {
     open();
-
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
+    Ru();
 
     unsigned long long int ISBN;
+    char num[8];
 
-    FILE* file;
-    if ((file = fopen("books.csv", "r")) == 0)
-    {
-        printf("Не могу открыть books.csv!");
-        exit(103);
-    }
-
-    printf("ISBN книги для выдачи: ");
+    printf("\n |> ISBN книги для выдачи: ");
     scanf("%lld", &ISBN);
-
-    bool t = false;                       
+    
+    bool t = false;                         //работаем со структурой и смотрим есть ли такая книга и сколько их
     int i;
-    for (i=0; i < ABoks; i++)
+    int day = 0, month = 0, year = 0;
+    bool manydates = false;
+    bool checkgive=false;
+
+    bool add;
+    for (i = 0; i < ABoks; i++)
     {
         if ((ISBN == books[i].ISBN) && (books[i].available > 0))
         {
-            books[i].available = books[i].available - 1;               
+            books[i].available = books[i].available - 1;                // если есть то уменьшаем и ставим индикатор булиан
             t = true;
+            printf(" |> Зачетная кинжка для выдачи: ");
+            scanf("%s", num);
+
+            FILE* file = fopen("student_books.csv", "a");
+
+            fprintf(file, "\n%lld;", ISBN);
+            fprintf(file, "%s;", num);
+
+            struct tm* u;
+            const time_t timer = time(NULL);
+            u = localtime(&timer);
+            u->tm_mday += 14;
+            u->tm_mon += 1;
+            u->tm_year += 1900;
+            fprintf(file, "%d.%d.%d", u->tm_mday, u->tm_mon, u->tm_year);
+            fclose(file);
+            checkgive = true;
+        }
+      
+
+        if (checkgive == false)
+        {
+            if ((ISBN == books[i].ISBN) && (books[i].available == 0))
+            {
+                for (int j = 0; j < Astubok; j++)
+                {
+                    if ((ISBN == SB[j].ISBN) && (manydates == true))
+                    {
+                        if (year == date[j].year)
+                        {
+                            if (month == date[j].month)
+                            {
+                                if (day > date[j].year)
+                                {
+                                    day = date[j].day;
+                                    month = date[j].month;
+                                    year = date[j].year;
+                                }
+                            }
+                            if (month > date[j].month)
+                            {
+                                day = date[j].day;
+                                month = date[j].month;
+                                year = date[j].year;
+                            }
+                        }
+                        if (year > date[j].year)
+                        {
+                            day = date[j].day;
+                            month = date[j].month;
+                            year = date[j].year;
+                        }
+                    }
+
+                    if ((ISBN == SB[j].ISBN) && (manydates == false))
+                    {
+                        day = date[j].day;
+                        month = date[j].month;
+                        year = date[j].year;
+                        manydates = true;
+                    }
+                }
+                printf("\n |> Нет доступных книг. Ближайшая дата сдачи: %d.%d.%d\n", day, month, year);
+                add = false;
+            }
         }
     }
-    fclose(file);
 
-    if (t == true)                               
+    if (t == true)                                  // если он стоит перезаписваем файл
     {
-        file = fopen("books.csv", "w");
+        FILE* file = fopen("books.csv", "w");
         for (int c = 0; c < ABoks; c++)
         {
             fprintf(file, "%lld;", books[c].ISBN);
@@ -357,46 +482,96 @@ void give_book()
             else 
             fprintf(file, "%d\n", books[c].available);
         }
-        printf("Книга выдана\n");
+        printf("  ***Книга выдана***\n");
+        add = true;
         fclose(file);
     }
-    else printf("Недостаточно книг или неверный ISBN!\n");
+
+    char s[11];
+    for (int i = 9; i >= 0; i--)
+    {
+        s[i] = ISBN % 10 + '0';
+        ISBN = ISBN / 10;
+    }
+    s[10] = '\0';
+
+    if (add == true)
+        log((char*)("give_book"), (char*)(s), (char*)("Выдано"));
+    else
+        log((char*)("give_book"), (char*)(s), (char*)("Ошибка по количеству книг"));
 }
 
+//Принять книгу от студента по номеру ISBN (необходимо увеличить количество доступных
+//книг на 1, если количество доступных книг равно количеству книг в библиотеке, вывести
+//соответствующее сообщение)
 
+//При выдаче и сдаче книги студенту пользователь должен указать ISBN книги и номер зачетки студента
 
 void take_book()
 {
     open();
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
+    Ru();
     unsigned long long int ISBN;
 
     FILE* file;
-    if ((file = fopen("books.csv", "r")) == 0)
-    {
-        printf("Не могу открыть books.csv!");
-        exit(104);
-    }
-
-    printf("ISBN книги для приема: ");
+    
+    printf(" |> ISBN книги для приема: ");
     scanf("%lld", &ISBN);
 
     bool t = false;
     int i = 0;
-    for (i; i < ABoks; i++)                                   
+    for (i; i < ABoks; i++)                                     // чекаем не много ли книг
     {
         if ((ISBN == books[i].ISBN) && (books[i].available < books[i].total))
         {
-            books[i].available = books[i].available + 1;
+            books[i].available += 1;
             t = true;
         }
     }
-    fclose(file);
+    bool add;
+ 
+    if (t == true)                                          // опять индикатор в виде булиан 
+    {
+        char num[8];
+        printf("|> Зачетная кинжка для приема: ");
+        scanf("%s", num);
+        
 
-    if (t == true)                                           
-    {                                                   
+        
+        FILE* file = fopen("student_books.csv","r");
+
+                char* buf = (char*)malloc((Astubok + 1) * ((sizeof(struct sbdate)) + (sizeof(struct student_books))));
+                int n = 0;
+
+                for (int i = 0; i < Astubok; i++)
+                {
+                    if ((strcmp(num, SB[i].zachet_book) == 0) && (ISBN == SB[i].ISBN))
+                    {
+                        while ((getc(file) != '\n') && (!feof(file)))
+                        {
+                            ;
+                        }
+                    }
+                        buf[n] = getc(file);
+                        while ((buf[n] != '\n') && (!feof(file)))
+                        {
+                            n++;
+                            buf[n] = getc(file);
+                        }
+                        buf[n] = '\n';
+                        n++;
+                }
+
+                buf[n - 1] = '\0';
+                fclose(file);
+
+                file = fopen("student_books.csv", "w");
+                for (int c = 0; c < (n-2); c++)
+                {
+                    fprintf(file, "%c", buf[c]);
+                }
+                fclose(file);
+                
         file = fopen("books.csv", "w");
         for (int c = 0; c < ABoks; c++)
         {
@@ -409,20 +584,42 @@ void take_book()
             else
                 fprintf(file, "%d\n", books[c].available);
         }
-        printf("Книга возвращена\n");
+        printf("|> Книга возвращена <|\n");
         fclose(file);
+        add = true;
+
     }
-    else printf("Слишком мало книг или неверный ISBN!");
+    else { printf(" |> Слишком много книг или неверный ISBN <|\n"); add = false; }
+
+    char s[11];
+    for (int i = 9; i >= 0; i--)
+    {
+        s[i] = ISBN % 10 + '0';
+        ISBN = ISBN / 10;
+    }
+    s[10] = '\0';
+
+    if (add == true)
+        log((char*)("take_book"), (char*)(s), (char*)("Взято"));
+    else
+        log((char*)("take_book"), (char*)(s), (char*)("Ошибка по количеству книг"));
 }
 
+//Завершить работу программы(текущее состояния библиотеки сохраняется в файл)
+//Мой код реализован с помощью структуры, но при выполнении каждой функции файл перезаписывается из структуры
+//поэтому при выходе из программы отдельная функция на сохранение файла не нужна
+
+
+// File students.csv
+
+//Добавить студента (при добавлении проверять, что такого студента еще нет по номеру
+//зачетной книжки)
 
 void add_student()
 {
     open();
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
-
+    Ru();
+    
     char zachet_book[8];
     char name[15];
     char lastname[15];
@@ -430,42 +627,38 @@ void add_student()
     char faculty[5];
     char prof[size];
 
-    FILE* file;
-    if ((file = fopen("students.csv", "a")) == 0)                          
-    {
-        printf("Не могу открыть students.csv!");
-        exit(301);
-    }
-    printf("Зачетная книжка для добавления: ");
+    FILE* file = fopen("students.csv", "a");                   
+
+    printf("\n=> Зачетная книжка для добавления: ");
     scanf("%s", zachet_book);
 
     for (int n = 0; n <= AStude; n++)
     {
         if (strcmp(zachet_book, student[n].zachet_book) == 0)
         {
-            printf("Такой студент уже сущетсвует!");
+            printf("  ***Такой студент уже сущетсвует***");
             exit(400);
         }
     }
-
-    printf("Фамилия: "); 
+    printf("=> Фамилия: "); 
     scanf("%s", lastname);
 
-    printf("Имя: ");  
+    printf("=> Имя: ");  
     scanf("%s", name);
     
-    printf("Отчество: "); 
+    printf("=> Отчество: "); 
     scanf("%s", f_name);
     
-    printf("факультет: "); 
+    printf("=> Факультет: "); 
     scanf("%s", faculty);
     
-    printf("Направление: ");
+    printf("=> Направление: ");
     int n = 0;
     char c = getchar();
     while ((c = getchar()) != '\n')
     {
-        prof[n] = c; n++;
+        prof[n] = c; 
+        n++;
     }
     prof[n] = '\0';
 
@@ -478,88 +671,109 @@ void add_student()
 
     fclose(file);
 
-    printf("Добавлено\n");
+    printf(" ***Добавлено***\n"); bool add = true;
+
+    if (add == true)
+        log((char*)("add_student"), (char*)(zachet_book), (char*)("Добавлено"));
+    else
+        log((char*)("add_student"), (char*)(zachet_book), (char*)("Ошибка"));
 }
 
-
+//Удалить студента по номеру зачетной книжки
+//Нельзя удалить студента, у которого есть книги
 
 void del_student()
 {
     open();
 
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
+    Ru();
 
     char zachet_book[8];
-     
-    FILE* file;
-    if ((file = fopen("students.csv", "r")) == 0)
-    {
-        printf("Не могу открыть students.csv");
-        exit(302);
-    }
-    printf("Зачетная книжка для удаления: ");
-    
+    int c;
+    bool del = false;
+
+    printf(" |> Зачетная книжка для удаления: ");
     scanf("%s", zachet_book);
 
-    char* buf = (char*)malloc((AStude+1)*(sizeof(struct student)));
-    int n = 0;
-
-    for (int i = 0; i < AStude; i++)
+    for (c = 0; c < Astubok; c++)
     {
-        if (strcmp(zachet_book, student[i].zachet_book) != 0)                     
+        if (strcmp(zachet_book, SB[c].zachet_book) == 0)
         {
-            buf[n] = getc(file);
-            while ((buf[n] != '\n') && (!feof(file)))
-            {
-                n++;
-                buf[n] = getc(file);
-            }
-            buf[n] = '\n'; 
-            n++;
-        }
-        if (strcmp(zachet_book, student[i].zachet_book) == 0)
-        {
-            while ((getc(file) != '\n') && (!feof(file)))
-            {
-                ;
-            }
+            del = true;
+            break;
         }
     }
-    buf[n - 1] = '\0';
-    fclose(file);
 
-    file = fopen("students.csv", "w");
+    bool add;
+    if (del == false)
+    {
+        FILE* file = fopen("students.csv", "r");
+        char* buf = (char*)malloc((AStude + 1) * (sizeof(struct student)));
+        int n = 0;
 
-    for (int e = 0; buf[e] != '\0'; e++)
-        fprintf(file, "%c", buf[e]);
-    
-    fclose(file);
-    free(buf);
-    
-    printf("Удалено!\n");
+        for (int i = 0; i < AStude; i++)
+        {
+            if (strcmp(zachet_book, student[i].zachet_book) != 0)                       // удаление такое же
+            {
+                buf[n] = getc(file);
+                while ((buf[n] != '\n') && (!feof(file)))
+                {
+                    n++;
+                    buf[n] = getc(file);
+                }
+                buf[n] = '\n';
+                n++;
+            }
+            if (strcmp(zachet_book, student[i].zachet_book) == 0)
+            {
+                while ((getc(file) != '\n') && (!feof(file)))
+                {
+                    ;
+                }
+            }
+        }
+        buf[n - 1] = '\0';
+        fclose(file);
+
+        file = fopen("students.csv", "w");
+
+        for (int e = 0; buf[e] != '\0'; e++)
+            fprintf(file, "%c", buf[e]);
+
+        fclose(file);
+        free(buf);
+
+        printf("   ***Удалено***\n");
+        add = true;
+
+    }
+    else { printf(" \n  Невозможно удалить студента,так как у него есть книга. Его зачетная книжка : %s\n", SB[c].zachet_book); add = false; }
+
+
+    if (add == true)
+        log((char*)("del_student"), (char*)(zachet_book), (char*)("Удалено"));
+    else
+        log((char*)("del_student"), (char*)(zachet_book), (char*)("Ошибка"));
 }
 
-
+//Сделать бэкап (сохранить состояние программы в файл «.csv», имя файла «students_<дата
+//и время > .csv», вывести сообщение успешно или не успешна завершилась операция)
 
 void backup_student()
 {
     open();
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
+    Ru();
 
     int n;
     FILE* file;
     if ((file = fopen("students.csv", "r")) == 0)
     {
-        printf("Не могу открыть students.csv!");
+        printf("Нет доступа к students.csv");
         exit(303);
     }
     char* buf = (char*)malloc((AStude+1)*(sizeof(struct student)));
 
-    for (n = 0; !feof(file); n++)           
+    for (n = 0; !feof(file); n++)           //бэкап через копирование в массив и запись в новый файл
     {
         buf[n] = getc(file);
     }
@@ -567,16 +781,16 @@ void backup_student()
 
     fclose(file);
 
-    struct tm* u;                          
-    const time_t timer = time(NULL);        
-    u = localtime(&timer);                 
+    struct tm* u;                           
+    const time_t timer = time(NULL);       
+    u = localtime(&timer);                  
 
     char array[50];
    
     for (int i = 0; i < 50; i++)
         array[i] = 0;
     
-    int len = strftime(array, 50, "%d.%m.%Y %H-%M", u);       
+    int len = strftime(array, 50, "%d.%m.%Y %H-%M", u);         // %что нам нужно день месяц....
 
     char f_title[32] = "students";
     int r = 8;
@@ -585,7 +799,7 @@ void backup_student()
     {
         f_title[r] = array[i];
     }
-    f_title[r] = '.';              
+    f_title[r] = '.';               // после записи названия ставм дату и потом расширение - вот оно
     f_title[r+1] = 'c';
     f_title[r+2] = 's';
     f_title[r+3] = 'v';
@@ -599,21 +813,23 @@ void backup_student()
     fclose(file);
     free(buf);
 
-    printf("Точка восстановления %s создана.\n", f_title);
+    printf(" |> Точка восстановления %s создана <|\n", f_title);
+   
+        log((char*)("backup_student"), (char*)(f_title), (char*)("Создана точка восстановления"));
+
 }
 
-
+//Восстановить базу из файла бэкапа (имя файла бэкапа указывает пользователь, вывести
+//сообщение как прошло восстановление данных)
 
 void restore_student()
 {
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
+    Ru();
 
     char backup_name[100];
     int bu = 0;
     
-    printf("\nНазвание файла восстановления(studentsXX.XX.XXXX TT-TT.csv): ");
+    printf("\n |> Название файла восстановления(studentsXX.XX.XXXX TT-TT.csv): ");
     
     char c = getchar();
     c = getchar();
@@ -628,15 +844,16 @@ void restore_student()
     FILE* file;
     if ((file = fopen(backup_name, "r")) == 0)
     {
-        printf("Не могу открыть students.csv!");
+        printf(" ***Нет доступа к students.csv***");
         exit(304);
     }
 
-    char* buf = (char*)malloc((AStude+1)*(sizeof(struct student)));
+    char* buf = (char*)malloc( 2 * (sizeof(char)));
     int n = 0;
 
-    for (n; !feof(file); n++)                               
+    for (n; !feof(file); n++)                               // считали имя файла его содержимое в массив и массив в наш основной файл
     {
+        buf = (char*)realloc(buf,(n + 1) * (sizeof(char)));
         buf[n] = getc(file);
     }
     buf[n - 1] = '\0';
@@ -650,37 +867,282 @@ void restore_student()
     fclose(file);
     free(buf);
 
-    printf("Файл students.csv восстановлен!\n");
+    printf(" |> Файл students.csv восстановлен <|\n");
+
+    log((char*)("restore_student"), (char*)(backup_name), (char*)("Восстановлено"));
 }
 
-
+//Поиск по фамилии студента (пользователь вводит фамилию студента, если библиотекой
+//пользуется один или несколько студентов - однофамильцев – выводится вся информация
+//по ним, если студента нет – выводится соответствующее сообщение)
 
 void find_student()
 {
     open();
-    SetConsoleCP(1251);
-    SetConsoleOutputCP(1251);
-    setlocale(LC_ALL, "Russian");
+    Ru();
 
     char lastname[15];
 
     printf("Фамилия: ");
     scanf("%s", lastname);
     bool t = false;
-
+    bool add;
     for (int i = 0;i < AStude; i++)
     {
-        if (strcmp(lastname, student[i].lastname) == 0)                        
+        if (strcmp(lastname, student[i].lastname) == 0)                         // просто прогоняем на совпадение
         {
             t = true;
-            printf("Зачетка %s \t ", student[i].zachet_book);
-            printf("Фамилия: %s \t", student[i].lastname);
-            printf("Имя: %s \t", student[i].name);
-            printf("Отчество: %s \t", student[i].f_name);
-            printf("Факультет: %s\t", student[i].facult);
-            printf("Направление: %s\n", student[i].prof);
+            printf("=>Зачетка %s \t ", student[i].zachet_book);
+            printf("=>Фамилия: %s \t", student[i].lastname);
+            printf("=>Имя: %s \t", student[i].name);
+            printf("=>Отчество: %s \t", student[i].f_name);
+            printf("=>Факультет: %s\t", student[i].facult);
+            printf("=>Направление: %s\n", student[i].prof);
+            add = true;
         }
     }
-    if (t == false)                                                    
-    printf("Cтудент не найден!\n");
+    if (t == false) {                                                // ну и метка 
+        printf("***Cтудент не найден***\n");
+        add = false;
+    }
+
+    if (add == true)
+        log((char*)("find_student"), (char*)(lastname), (char*)("Студент найден"));
+    else
+        log((char*)("find_student"), (char*)(lastname), (char*)("Ошибка"));
+}
+
+
+
+//Для каждого студента (по номеру зачетки) есть возможность посмотреть информацию по
+//всем его книгам(информация из книги и дата сдачи в библиотеку)
+
+void inf_stud_by_num()
+{
+    char num[8];
+    bool t = false;
+    printf(" |> Введите номер зачетной книжки:");
+    scanf("%s", num);
+    for (int i = 0; i < Astubok; i++)
+    {
+        if (strcmp(num, SB[i].zachet_book) == 0)
+        {
+            t = true;
+            printf("\n |> Дата сдачи: %d.%d.%d <|\n", date[i].day,date[i].month,date[i].year);
+            for (int j = 0; j < ABoks; j++)
+            {
+                if (SB[i].ISBN == books[j].ISBN)
+                {
+                    printf("=> ISBN:%lld  \n", books[j].ISBN);
+                    printf("=> Автор:%s  \n", books[j].Author);
+                    printf("=> Название:%s  \n", books[j].booktitle);
+                    printf("=> Всего книг:%d  \n", books[j].total);
+                    printf("=> Книг доступно:%d  \n", books[j].available);
+                }
+            }
+        }
+
+
+    }
+    if (t == false) {
+            printf(" ***Нет резервируемых книг***\n");
+    }
+        log((char*)("inf_stud_by_num"), (char*)(num), (char*)("Иформация выдана"));
+}
+
+//Для каждой книги можно посмотреть информацию по студентам, которые ее взяли
+//(информация о студенте и дата сдачи в библиотеку)
+
+void inf_book_by_isbn()
+{
+    unsigned long long int ISBN;
+    int i = 0;
+    bool t = false;
+    printf(" |> Введите ISBN книги: ");
+    scanf("%lld",&ISBN);
+    for (int i = 0; i < Astubok; i++)
+    {
+        if (ISBN == SB[i].ISBN)
+        {
+            t = true;
+            printf("\n |> Дата сдачи: %d.%d.%d <|\n", date[i].day, date[i].month, date[i].year);
+            for (int j = 0; j < ABoks; j++)
+            {
+                if (strcmp(SB[i].zachet_book, student[j].zachet_book) == 0)
+                {
+                    printf("=>Зачетная книжка:%s  \n", student[j].zachet_book);
+                    printf("=>Имя:%s  \n", student[j].lastname);
+                    printf("=>Фамилия:%s  \n", student[j].name);
+                    printf("=>Отчество:%s  \n", student[j].f_name);
+                    printf("=>Факультет:%s  \n", student[j].facult);
+                    printf("=>Специальность:%s\n", student[j].prof);
+                }
+            }
+        }
+
+    }
+    if (t == false){
+        printf(" ***Нет книги или не резервирована***\n");
+    }
+
+    char s[11];
+    for (int i = 9; i >= 0; i--)
+    {
+        s[i] = ISBN % 10 + '0';
+        ISBN = ISBN / 10;
+    }
+    s[10] = '\0';
+
+    log((char*)("inf_book_by_isbn"), (char*)(s), (char*)("Иформация выдана"));
+}
+
+void log(char* function, char* param, char* msg)
+{
+    FILE* file;
+    if ((file = fopen("library.log", "a")) == 0)
+    {
+        printf("Нет доступа к library.log");
+        exit(700);
+    }
+    struct tm* u;                           
+    const time_t timer = time(NULL);        
+    u = localtime(&timer);
+    u->tm_mon += 1;
+    u->tm_year += 1900;
+    fprintf(file, "%d.%d.%d %d:%d:%d;", u->tm_mday, u->tm_mon, u->tm_year, u->tm_hour, u->tm_min, u->tm_sec);
+    fprintf(file, "%s;", login);
+    fprintf(file, "%s;", function);
+    fprintf(file, "%s;", param);
+    fprintf(file, "%s\n", msg);
+    fclose(file);
+}
+
+int menu()
+{
+
+    int stp = -1;
+
+    printf("Login:");       // просим логин
+    scanf("%s", login);
+    printf("Password:");    //просим пароль
+    scanf("%s", password);
+    printf("\n");
+
+    for (int i = 0; i < Ausrs; i++)         //Сравниваем входные данные и то что в структре 
+    {
+        if ((strcmp(login, user[i].login) == 0) && (strcmp(password, user[i].password) == 0))
+        {
+            stp = i;
+            break;
+        }
+    }
+    int users = -1;     // индекс для выбора меню
+
+    for (;;)
+    {
+        if ((user[stp].student == 1) && (user[stp].book == 1) && (men == false))      // если все 1-1 то еще раз спрашиваем(меню верхнее)
+        {
+            printf("> Меню студентов \n> Меню книг \n> Выберите меню:");
+            scanf("%d", &users);
+            men = true;
+        }
+
+        int u = 0;
+
+        if ((users == 1) || ((user[stp].student == 1) && (user[stp].book == 0)))        //если только 1-0 , то вывод меню студ
+        {
+            if (men == true)
+                printf("\n |> Выход в меню \n |> Добавить студента \n |> Удалить студента \n |> Backup студента \n |> Восстановить студента \n |> Найти студента \n |> Информация \n |> Выход \n");
+            else
+                printf("\n |> Добавить студента \n |> Удалить студента \n |> Backup студента \n |> Восстановить студента \n |> Найти студента \n |> Информация \n |> Выход \n");
+            printf(" |> Выберите функцию:");
+            
+                scanf("%d", &u);
+                switch (u) {
+                case 0: {
+                    system("cls");
+                    men = false;
+                    break;
+                }
+                case 1: {
+                    add_student();
+                    printf(" |> Выберите функцию: ");
+                }
+                case 2: {
+                    del_student();
+                    printf(" |> Выберите функцию: ");
+                }
+                case 3: {
+                    backup_student();
+                    printf(" |> Выберите функцию: ");
+                }
+                case 4: {
+                    restore_student();
+                    printf(" |> Выберите функцию: ");
+                }
+                case 5: {
+                    find_student();
+                    printf(" |> Выберите функцию: ");
+                }
+                case 6: {
+                    inf_stud_by_num();
+                    printf(" |> Выберите функцию: ");
+                }
+                case 7: return 0;
+                default:
+                {
+                    printf("  ***Нет такой функции***\n");
+                    return 0;
+                }
+                }
+                printf("\n");
+            
+        }
+        if ((users == 2) || ((user[stp].student == 0) && (user[stp].book == 1)))            // соответсвенно вывод меню книг
+        {
+            if (men == true)
+                printf("\n |> Выход в меню \n |> Добавить книгу \n |> Удалить книгу \n |> Резервировать книгу \n |> Принять книгу \n |> Информация \n |> Выход \n");
+            else
+                printf("\n |> Добавить книгу \n |> Удалить книгу \n |> Резервировать книгу \n |> Принять книгу \n |> Информация \n |> Выход \n");
+            printf(" |> Выберите функцию:");
+            
+                scanf("%d", &u);
+                switch (u) {
+                case 0: {
+                    system("cls");
+                    men = false;
+                    break;
+                }
+                case 1: {
+                    add_book();
+                    printf(" |> Выберите функцию:");
+                }
+                case 2: {
+                    del_book();
+                    printf(" |> Выберите функцию: ");
+                }
+                case 3: {
+                    give_book();
+                    printf(" |> Выберите функцию:");
+                }
+                case 4: {
+                    take_book();
+                    printf(" |> Выберите функцию:");
+                }
+                case 5: {
+                    inf_book_by_isbn();
+                    printf(" |> Выберите функцию:");
+                }
+                case 6: return 0;
+                default:
+                {
+                    printf("\n  ***Нет такой функции***\n");
+                    return 0;
+                }
+                }
+            
+            printf("\n");
+        }
+    }
+
 }
