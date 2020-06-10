@@ -1017,6 +1017,7 @@ void log(char* function, char* param, char* msg)
     fclose(file);
 }
 
+
 int menu()
 {
 
@@ -1057,46 +1058,43 @@ int menu()
                 printf("\n |> Добавить студента \n |> Удалить студента \n |> Backup студента \n |> Восстановить студента \n |> Найти студента \n |> Информация \n |> Выход \n");
             printf(" |> Выберите функцию:");
             
-                scanf("%d", &u);
-                switch (u) {
-                case 0: {
-                    system("cls");
-                    men = false;
-                    break;
-                }
-                case 1: {
+            for (;;)
+            {
+                scanf("%d", &u);                                            // БАААГГ если в меню книг ввести букву будет вечный цикл и снизу такой же
+                if (u == 1)
+                {
                     add_student();
                     printf(" |> Выберите функцию: ");
                 }
-                case 2: {
+                else if (u == 2) {
                     del_student();
                     printf(" |> Выберите функцию: ");
                 }
-                case 3: {
+                else if (u == 3) {
                     backup_student();
                     printf(" |> Выберите функцию: ");
                 }
-                case 4: {
+                else if (u == 4) {
                     restore_student();
                     printf(" |> Выберите функцию: ");
                 }
-                case 5: {
+                else if (u == 5) {
                     find_student();
                     printf(" |> Выберите функцию: ");
                 }
-                case 6: {
+                else if (u == 6) {
                     inf_stud_by_num();
                     printf(" |> Выберите функцию: ");
                 }
-                case 7: return 0;
-                default:
+                else if (u == 7)
+                    return 0;
+                else
                 {
                     printf("  ***Нет такой функции***\n");
                     return 0;
                 }
-                }
                 printf("\n");
-            
+            }
         }
         if ((users == 2) || ((user[stp].student == 0) && (user[stp].book == 1)))            // соответсвенно вывод меню книг
         {
@@ -1106,40 +1104,38 @@ int menu()
                 printf("\n |> Добавить книгу \n |> Удалить книгу \n |> Резервировать книгу \n |> Принять книгу \n |> Информация \n |> Выход \n");
             printf(" |> Выберите функцию:");
             
+            for (;;)
+            {
                 scanf("%d", &u);
-                switch (u) {
-                case 0: {
-                    system("cls");
-                    men = false;
-                    break;
-                }
-                case 1: {
+                if (u == 1) {
                     add_book();
                     printf(" |> Выберите функцию:");
                 }
-                case 2: {
+                else if (u == 2) {
                     del_book();
                     printf(" |> Выберите функцию: ");
                 }
-                case 3: {
+                else if (u == 3) {
                     give_book();
                     printf(" |> Выберите функцию:");
                 }
-                case 4: {
+                else if (u == 4) {
                     take_book();
                     printf(" |> Выберите функцию:");
                 }
-                case 5: {
+                else if (u == 5) {
                     inf_book_by_isbn();
                     printf(" |> Выберите функцию:");
                 }
-                case 6: return 0;
-                default:
+                else if (u == 6)
+                    return 0;
+                else
                 {
                     printf("\n  ***Нет такой функции***\n");
                     return 0;
                 }
-                }
+            }
+            printf("\n");
             
             printf("\n");
         }
